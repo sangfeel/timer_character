@@ -12,6 +12,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import android.util.Log
 
 @Composable
 fun CharacterVideoRotator(
@@ -20,7 +21,7 @@ fun CharacterVideoRotator(
     @RawRes studyBaseRes: Int,
     studyOtherResList: List<Int>,
     restResList: List<Int>,
-    baseRepeatCount: Int = 10
+    baseRepeatCount: Int = 5
 ) {
     val context = LocalContext.current
 
@@ -60,23 +61,35 @@ fun CharacterVideoRotator(
     DisposableEffect(isRunning, studyBaseRes, studyOtherResList, restResList, baseRepeatCount) {
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
+                Log.d("Rotator", "state=$playbackState running=$isRunning res=$currentRes baseCount=$baseCount")
                 if (playbackState != Player.STATE_ENDED) return
-
+                Log.d("Rotator", "ENDED! pick next")
                 if (isRunning) {
-                    // study_penguin 10번 + 나머지 1번 랜덤
-                    if (baseCount < baseRepeatCount) {
-                        currentRes = studyBaseRes
+                    val nextRes = if (baseCount < baseRepeatCount) {
                         baseCount += 1
+                        studyBaseRes
                     } else {
-                        val next = (studyOtherResList.ifEmpty { listOf(studyBaseRes) }).random()
-                        currentRes = next
                         baseCount = 0
+                        (studyOtherResList.ifEmpty { listOf(studyBaseRes) }).random()
+                    }
+
+                    if (nextRes == currentRes) {
+                        // ✅ 같은 영상 반복: 상태 변경 없이도 확실히 다시 재생
+                        player.seekTo(0)
+                        player.play()
+                    } else {
+                        currentRes = nextRes
                     }
                 } else {
-                    // 멈춤: rest 전부 랜덤
-                    val next = (restResList.ifEmpty { listOf(studyBaseRes) }).random()
-                    currentRes = next
+                    val nextRes = (restResList.ifEmpty { listOf(studyBaseRes) }).random()
+                    if (nextRes == currentRes) {
+                        player.seekTo(0)
+                        player.play()
+                    } else {
+                        currentRes = nextRes
+                    }
                 }
+
             }
         }
 
