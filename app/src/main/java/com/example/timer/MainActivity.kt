@@ -20,26 +20,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import com.example.timer.ui.LoopingVideo
+import com.example.timer.ui.theme.home.HomeScreen
+import androidx.compose.ui.graphics.Color
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Surface(Modifier.fillMaxSize()) {
-                    Column(
-                        modifier = Modifier.fillMaxSize().padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("MP4 테스트", style = MaterialTheme.typography.titleLarge)
-                        Spacer(Modifier.height(16.dp))
-
-                        // 여기서 raw 파일을 하나 지정해서 테스트합니다.
-                        LoopingVideo(
-                            modifier = Modifier.size(260.dp),
-                            rawResId = R.raw.study_penguin
-                        )
-                    }
+                Surface(Modifier.fillMaxSize(),
+                    color = Color.White
+                ) {
+                    HomeScreen()
                 }
             }
         }
